@@ -1,0 +1,112 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Gallery from '../../components/public/Gallery.vue';
+import { getVisibleAlbums, getAlbumBySlug } from '../../lib/albums';
+import { getThumbUrl, getFullUrl } from '../../lib/r2';
+
+export async function getStaticPaths() {
+  const albums = await getVisibleAlbums();
+  return albums.map(a => ({ params: { slug: a.slug } }));
+}
+
+const { slug } = Astro.params;
+const album = await getAlbumBySlug(slug!);
+
+if (!album || !album.visible) return Astro.redirect('/');
+
+const visiblePhotos = album.photos
+  .filter(p => p.visible)
+  .sort((a, b) => a.order - b.order)
+  .map(p => ({
+    ...p,
+    // Cloudflare Image Resizing generates variants on demand via /cdn-cgi/image/…
+    thumbUrl: getThumbUrl(album.slug, p.filename),
+    fullUrl:  getFullUrl(album.slug, p.filename),
+  }));
+---
+
+<BaseLayout title={`${album.title} — Owen LE BEC`} description={album.description}>
+  <!-- Album header -->
+  <div class="album-header">
+    <a href="/" class="back-link">← Retour</a>
+    <div class="album-header-content">
+      <h1 class="album-header-title">{album.title}</h1>
+      {album.description && (
+        <p class="album-header-desc">{album.description}</p>
+      )}
+      <p class="album-header-count">
+        {visiblePhotos.length} photo{visiblePhotos.length > 1 ? 's' : ''}
+      </p>
+    </div>
+  </div>
+
+  <!-- Gallery (Vue island) -->
+  <div class="gallery-wrap">
+    <Gallery photos={visiblePhotos} client:load />
+  </div>
+</BaseLayout>
+
+<style>
+  .album-header {
+    padding: 48px 48px 40px;
+    border-bottom: 1px solid var(--border);
+  }
+  .back-link {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    text-decoration: none;
+    transition: color 0.15s;
+    display: inline-block;
+    margin-bottom: 24px;
+  }
+  .back-link:hover { color: var(--fg); }
+
+  .album-header-title {
+    font-family: 'Libre Baskerville', serif;
+    font-size: clamp(32px, 5vw, 56px);
+    font-weight: 400;
+    color: var(--fg);
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+  }
+  .album-header-desc {
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--fg-muted);
+    max-width: 480px;
+    line-height: 1.7;
+  }
+  .album-header-count {
+    margin-top: 8px;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    opacity: 0.6;
+  }
+  .gallery-wrap {
+    padding: 2px;
+    background: var(--bg);
+  }
+
+  @media (max-width: 768px) {
+    .album-header { padding: 32px 20px 28px; }
+  }
+</style>
+
+<script>
+  import gsap from 'gsap';
+
+  const motionOk = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (motionOk) {
+    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+    tl.from('.back-link',          { x: -14, opacity: 0, duration: 0.5 })
+      .from('.album-header-title', { y: 32, opacity: 0, duration: 0.8 }, '-=0.25')
+      .from('.album-header-desc',  { y: 14, opacity: 0, duration: 0.6 }, '-=0.4')
+      .from('.album-header-count', { y: 10, opacity: 0, duration: 0.5 }, '-=0.35')
+      .from('.gallery-wrap',       { opacity: 0, duration: 0.9 }, '-=0.3');
+  }
+</script>

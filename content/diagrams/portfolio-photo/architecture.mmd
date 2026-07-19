@@ -1,0 +1,36 @@
+graph TD
+    subgraph Public
+        A[Visiteur]
+    end
+    subgraph Admin
+        B[Admin]
+    end
+    subgraph Netlify
+        C[Astro SSR / SSG]
+        F[Netlify Build]
+    end
+    subgraph Cloudflare
+        D[R2 Storage]
+        E[CDN + Image Resizing]
+    end
+
+    A -- GET pages --> C
+    C -- GET albums JSON --> D
+    D -- Album data --> C
+    C -- HTML + photos --> A
+
+    A -- GET /cdn-cgi/image/ --> E
+    E -- Cache miss --> D
+    D -- JPEG original --> E
+    E -- WebP redimensionné --> A
+
+    B -- GET /api/presign --> C
+    C -- URL signée S3 --> B
+    B -- PUT photo direct --> D
+
+    B -- PUT /api/albums --> C
+    C -- PUT JSON --> D
+
+    B -- POST /api/publish --> C
+    C -- Build hook --> F[Netlify Build]
+    F -- Deploy --> C

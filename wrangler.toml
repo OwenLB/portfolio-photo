@@ -1,0 +1,9 @@
+name = "portfolio-photo"
+compatibility_date = "2025-01-01"
+
+[[r2_buckets]]
+binding = "R2"
+bucket_name = "photo-portfolio"
+
+[vars]
+R2_PUBLIC_URL = "https://pub-xxxx.r2.dev"

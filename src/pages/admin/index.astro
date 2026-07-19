@@ -1,0 +1,68 @@
+---
+export const prerender = false;
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import AlbumList from '../../components/admin/AlbumList.vue';
+import { getAllAlbums } from '../../lib/albums';
+
+const albums = await getAllAlbums();
+const currentPath = '/admin';
+---
+
+<AdminLayout title="Albums" currentPath={currentPath}>
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Albums</h1>
+      <p class="page-subtitle">{albums.length} album{albums.length > 1 ? 's' : ''} au total</p>
+    </div>
+    <a href="/admin/album/new" class="btn-new">
+      <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      Nouvel album
+    </a>
+  </div>
+
+  <AlbumList albums={albums} client:load />
+</AdminLayout>
+
+<style>
+  .page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+  .page-title {
+    font-size: 20px;
+    font-weight: 500;
+    color: #0c0c0c;
+    letter-spacing: -0.02em;
+    margin: 0 0 2px;
+  }
+  .page-subtitle {
+    font-size: 12px;
+    color: #909090;
+    margin: 0;
+    letter-spacing: 0.02em;
+  }
+  .btn-new {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 14px;
+    border: 1px solid #e6e6e3;
+    border-radius: 4px;
+    font-size: 12px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    color: #404040;
+    background: #fff;
+    text-decoration: none;
+    transition: background 0.15s, border-color 0.15s;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .btn-new:hover { background: #f7f7f5; border-color: #d0d0cc; }
+</style>

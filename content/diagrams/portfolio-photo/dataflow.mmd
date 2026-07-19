@@ -1,0 +1,20 @@
+sequenceDiagram
+    participant Browser as Navigateur
+    participant Astro as Astro Build/SSR
+    participant R2 as Cloudflare R2
+    participant CDN as CDN Cloudflare
+
+    Browser->>Astro: GET /album/tokyo-2025
+    Astro->>R2: GET albums/tokyo-2025.json
+    R2-->>Astro: photos Photo[]
+    Astro->>Astro: Map vers GalleryPhoto[]\nthumb URL + full URL CDN
+    Astro-->>Browser: HTML + Gallery props
+
+    Note over Browser: Vue hydrate Gallery.vue island
+    Browser->>Browser: justified-layout calcule positions\nResizeObserver
+    Browser->>CDN: GET /cdn-cgi/image/width=1200/.../photo.jpg
+    CDN-->>Browser: WebP 1200px
+
+    Note over Browser: Click photo → Lightbox
+    Browser->>CDN: GET /cdn-cgi/image/width=4000/.../photo.jpg
+    CDN-->>Browser: WebP full-res

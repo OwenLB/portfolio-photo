@@ -1,0 +1,16 @@
+graph TD
+    Root["/\nindex.astro"]:::static --> AlbumSlug["/album/slug\nSSG"]:::static
+    AlbumSlug --> Gallery["Gallery.vue\nLightbox.vue\nIsland Vue"]:::island
+
+    Root --> Admin["/admin\nSSR"]:::ssr
+    Admin --> AdminNew["/admin/album/new\nSSR"]:::ssr
+    Admin --> AdminEdit["/admin/album/slug\nAlbumEditor + PhotoUploader\nIsland Vue"]:::island
+
+    Root --> API["/api/*\nSSR"]:::ssr
+    API --> Presign["/api/presign"]
+    API --> AlbumsAPI["/api/albums/slug"]
+    API --> Publish["/api/publish"]
+
+    classDef static fill:#1a3a5c,color:#fff,stroke:#2a5a8c
+    classDef ssr fill:#3a1a5c,color:#fff,stroke:#5a2a8c
+    classDef island fill:#1a5c3a,color:#fff,stroke:#2a8c5a

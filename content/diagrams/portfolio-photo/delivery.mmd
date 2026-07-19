@@ -1,0 +1,10 @@
+flowchart LR
+    A[Navigateur] -->|GET /cdn-cgi/image/width=1200\nquality=78,format=webp/photo.jpg| B
+
+    B{CDN Cache\nCloudflare}
+    B -->|HIT| A
+    B -->|MISS| C[Image Resizing]
+    C -->|Fetch original| D[R2\nJPEG original]
+    D --> C
+    C -->|Resize + WebP| B
+    B -->|WebP + Cache-Control| A

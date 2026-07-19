@@ -1,0 +1,18 @@
+sequenceDiagram
+    participant Admin as Navigateur Admin
+    participant Astro as Astro SSR
+    participant R2 as Cloudflare R2
+
+    Admin->>Astro: GET /api/presign?album=X&filename=Y
+    Astro->>Astro: generatePresignedUrl() TTL 3600s
+    Astro-->>Admin: presignedUrl + publicUrl
+
+    Admin->>Admin: Lit dimensions via Image API
+    Admin->>R2: PUT presignedUrl (XHR + progress)
+    R2-->>Admin: 200 OK
+
+    Note over Admin: Construit Photo avec w/h/CDN URLs
+    Admin->>Astro: PUT /api/albums/slug
+    Astro->>R2: PUT albums/slug.json
+    Astro->>R2: PUT albums/index.json
+    Astro-->>Admin: 200 OK

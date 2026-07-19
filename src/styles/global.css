@@ -1,0 +1,337 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Theme tokens ─────────────────────────────────────────────────── */
+:root,
+[data-theme="dark"] {
+  --bg:         #080808;
+  --bg-alt:     #111111;
+  --fg:         #e8e8e8;
+  --fg-muted:   #555555;
+  --border:     #1c1c1c;
+  --header-bg:  rgba(8, 8, 8, 0.92);
+  --img-filter: brightness(0.85) saturate(0.8);
+  --img-hover:  brightness(0.97) saturate(1);
+}
+
+[data-theme="light"] {
+  --bg:         #FFFFFF;
+  --bg-alt:     #F2F2F2;
+  --fg:         #0D0D0D;
+  --fg-muted:   #6B6B6B;
+  --border:     rgba(0, 0, 0, 0.1);
+  --header-bg:  rgba(255, 255, 255, 0.92);
+  --img-filter: brightness(0.95) saturate(0.85);
+  --img-hover:  brightness(1) saturate(1);
+}
+
+/* ── Base ─────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--fg);
+  font-family: 'Inter', system-ui, sans-serif;
+  transition: background-color 0.25s ease, color 0.25s ease;
+  min-height: 100vh;
+}
+
+/* ── Scrollbar ────────────────────────────────────────────────────── */
+::-webkit-scrollbar                             { width: 6px; }
+[data-theme="dark"] ::-webkit-scrollbar-track   { background: #0f0f0f; }
+[data-theme="dark"] ::-webkit-scrollbar-thumb   { background: #2a2a2a; border-radius: 3px; }
+[data-theme="light"] ::-webkit-scrollbar-track  { background: #f5f5f3; }
+[data-theme="light"] ::-webkit-scrollbar-thumb  { background: #d0d0cc; border-radius: 3px; }
+
+/* ── Header ───────────────────────────────────────────────────────── */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 48px;
+  background: var(--header-bg);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.site-logo {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 17px;
+  font-weight: 400;
+  color: var(--fg);
+  text-decoration: none;
+  letter-spacing: 0.01em;
+  opacity: 1;
+  transition: opacity 0.2s ease;
+}
+.site-logo:hover { opacity: 0.5; }
+
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+/* Nav links: sliding underline from left */
+.site-nav a {
+  position: relative;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+.site-nav a::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.site-nav a:hover {
+  color: var(--fg);
+}
+.site-nav a:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* ── Theme toggle ─────────────────────────────────────────────────── */
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  color: var(--fg-muted);
+  transition: color 0.2s, border-color 0.2s, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  flex-shrink: 0;
+}
+.theme-toggle:hover {
+  color: var(--fg);
+  border-color: var(--fg-muted);
+  transform: rotate(18deg) scale(1.1);
+}
+.theme-toggle svg { width: 14px; height: 14px; }
+
+/* ── Album rows (homepage) ────────────────────────────────────────── */
+.album-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 560px 1fr;
+  border-bottom: 1px solid var(--border);
+  /* Vertical accent line that grows on hover */
+}
+
+.album-row::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 2px;
+  height: 0;
+  background: var(--fg);
+  transition: height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 2;
+  pointer-events: none;
+}
+.album-row:hover::before { height: 100%; }
+
+.album-row.reverse {
+  grid-template-columns: 1fr 560px;
+}
+
+/* ── Image ──────────────────────────────────────────────────────── */
+.album-row-img {
+  width: 560px;
+  height: 400px;
+  overflow: hidden;
+  position: relative;
+  flex-shrink: 0;
+  grid-column: 1;
+  grid-row: 1;
+}
+.album-row.reverse .album-row-img { grid-column: 2; }
+
+.album-row-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: var(--img-filter);
+  transition: filter 0.6s ease, transform 0.8s cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+/* Image drifts toward the info panel on hover */
+.album-row:not(.reverse):hover .album-row-img img {
+  filter: var(--img-hover);
+  transform: scale(1.06) translateX(10px);
+}
+.album-row.reverse:hover .album-row-img img {
+  filter: var(--img-hover);
+  transform: scale(1.06) translateX(-10px);
+}
+
+/* ── Info panel ─────────────────────────────────────────────────── */
+.album-row-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 64px 72px;
+  grid-column: 2;
+  grid-row: 1;
+  border-left: 1px solid var(--border);
+  background-color: transparent;
+  transition: background-color 0.5s ease;
+}
+.album-row:hover .album-row-info { background-color: var(--bg-alt); }
+
+.album-row.reverse .album-row-info {
+  grid-column: 1;
+  border-left: none;
+  border-right: 1px solid var(--border);
+  text-align: right;
+  align-items: flex-end;
+}
+
+.album-row.reverse .album-row-cta { flex-direction: row-reverse; }
+
+.album-row-num {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  margin-bottom: 20px;
+  transition: color 0.3s ease, opacity 0.3s ease;
+}
+.album-row:hover .album-row-num { color: var(--fg); opacity: 1; }
+
+.album-row-title {
+  font-family: 'Libre Baskerville', serif;
+  font-size: clamp(28px, 3vw, 44px);
+  font-weight: 400;
+  line-height: 1.15;
+  color: var(--fg);
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), color 0.4s ease;
+}
+.album-row:hover .album-row-title { transform: translateY(-3px); }
+
+.album-row-title em {
+  font-style: italic;
+  color: var(--fg-muted);
+}
+
+.album-row-cta {
+  margin-top: 36px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  text-decoration: none;
+  transition: color 0.25s ease, gap 0.25s ease, transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.album-row-cta::after {
+  content: '→';
+  font-size: 13px;
+  letter-spacing: 0;
+  display: inline-block;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.album-row:hover .album-row-cta {
+  color: var(--fg);
+  gap: 14px;
+  transform: translateX(5px);
+}
+.album-row:hover .album-row-cta::after { transform: translateX(5px); }
+
+/* CTA for reverse rows moves left */
+.album-row.reverse:hover .album-row-cta { transform: translateX(-5px); }
+.album-row.reverse:hover .album-row-cta::after { transform: translateX(-5px); }
+
+.album-row-count {
+  margin-top: 12px;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  opacity: 0.6;
+  transition: color 0.4s ease;
+}
+
+/* ── Mobile album rows ────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .site-header { padding: 0 20px; }
+
+  .album-row,
+  .album-row.reverse {
+    grid-template-columns: 1fr;
+    grid-template-rows: 260px auto;
+  }
+
+  .album-row-img,
+  .album-row.reverse .album-row-img {
+    grid-column: 1;
+    grid-row: 1;
+    width: 100%;
+    height: 260px;
+  }
+
+  .album-row-info,
+  .album-row.reverse .album-row-info {
+    grid-column: 1;
+    grid-row: 2;
+    border-left: none;
+    border-right: none;
+    border-top: 1px solid var(--border);
+    padding: 36px 24px;
+  }
+
+  /* Disable directional drift on touch screens */
+  .album-row:not(.reverse):hover .album-row-img img,
+  .album-row.reverse:hover .album-row-img img {
+    transform: scale(1.03);
+  }
+}
+
+/* ── Animations ───────────────────────────────────────────────────── */
+.animate-fade-in {
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Honour reduced-motion: kill all transitions & animations */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

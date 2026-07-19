@@ -1,0 +1,22 @@
+---
+export const prerender = false;
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import AlbumEditor from '../../../components/admin/AlbumEditor.vue';
+import { getAlbumBySlug } from '../../../lib/albums';
+import { getThumbUrl, getFullUrl } from '../../../lib/r2';
+
+const { slug } = Astro.params;
+const album = await getAlbumBySlug(slug!);
+
+if (!album) return Astro.redirect('/admin');
+
+const photosWithUrls = album.photos.map(p => ({
+  ...p,
+  thumbUrl: getThumbUrl(album.slug, p.filename),
+  fullUrl:  getFullUrl(album.slug, p.filename),
+}));
+---
+
+<AdminLayout title={album.title} currentPath={`/admin/album/${slug}`}>
+  <AlbumEditor album={{ ...album, photos: photosWithUrls }} client:load />
+</AdminLayout>
